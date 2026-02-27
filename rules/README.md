@@ -6,7 +6,7 @@ A collection of reusable [Cursor](https://cursor.com) rules for consistent AI-as
 
 Each subfolder is a self-contained rule pack with:
 
-- **`.cursorrules`** – the rule Cursor uses (formatting, style, conventions).
+- **Rule file (`.mdc`)** – the rule Cursor uses (formatting, style, conventions). Copy into `.cursor/rules/` in your project.
 - **`README.md`** – what the rule does and when it applies.
 
 ## Available rules
@@ -15,13 +15,14 @@ Each subfolder is a self-contained rule pack with:
 | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [google-python-style-guide](./google-python-style-guide/)    | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html): lint/formatting, imports, naming, docstrings, types, and language conventions for Python.      |
 | [google-typescript-style-guide](./google-typescript-style-guide/) | [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html): modules, naming, types, classes, control flow, and formatting for TypeScript and TSX. |
+| [rust-style-guide](./rust-style-guide/)                      | Rust code style: 100-char lines, 500-line files, rustfmt alignment, comments, docs, naming, and alignment with official Rust and API guidelines.                             |
 
 ## How to use
 
 - **In a project**: Copy the rule folder into your repo (e.g. `.cursor/rules/` or a `rules/` directory) and reference or enable it in Cursor.
-- **As reference**: Clone or link this repo and point Cursor (or your rule config) at the `.cursorrules` file you want.
+- **As reference**: Clone or link this repo and point Cursor (or your rule config) at the `.mdc` rule file you want.
 - **Per rule**: See the rule’s own `README.md` for scope (e.g. file globs) and details.
 
 ## Adding rules
 
-Add new rule packs as top-level folders: put a `.cursorrules` file and an optional `README.md` in each folder, then add an entry to the **Available rules** table above.
+Add new rule packs as top-level folders: put a rule file (`.mdc`) and an optional `README.md` in each folder, then add an entry to the **Available rules** table above.
