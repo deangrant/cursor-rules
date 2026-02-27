@@ -17,6 +17,7 @@ Align with these style guides and checklists when applying the Rust style rule.
 
 - **URL**: https://microsoft.github.io/rust-guidelines/
 - **Checklist**: https://microsoft.github.io/rust-guidelines/guidelines/checklist/index.html
+- **Documentation**: https://microsoft.github.io/rust-guidelines/guidelines/docs/ — first sentence ~15 words (M-FIRST-DOC-SENTENCE), module docs (M-MODULE-DOCS), canonical sections (M-CANONICAL-DOCS), `#[doc(inline)]` for crate re-exports (M-DOC-INLINE). Enforced by **rust-documentation.mdc** in this folder.
 - Universal, library (interop, UX, resilience, building), apps, FFI, safety, performance, documentation, AI. Apply spirit of guidelines; prefer regular functions where appropriate (M-REGULAR-FN).
 
 ## Comprehensive Rust (Google)
