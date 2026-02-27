@@ -1,27 +1,23 @@
-# Cursor Rules
+# cursor-workspace
 
-A collection of reusable [Cursor](https://cursor.com) rules for consistent AI-assisted coding across projects.
+Reusable [Cursor](https://cursor.com) rules and agent skills for consistent, AI-assisted coding and domain guidance across projects.
 
 ## What’s in this repo
 
-Each subfolder is a self-contained rule pack with:
+| Directory | Purpose |
+| --------- | ------- |
+| [**rules/**](./rules/) | Rule packs (formatting, style, conventions) — each with a `.cursorrules` file and optional README. |
+| [**skills/**](./skills/) | Agent skills (domain knowledge, when-to-use guidance) — each with a `SKILL.md` and optional README/reference. |
 
-- **`.cursorrules`** – the rule Cursor uses (formatting, style, conventions).
-- **`README.md`** – what the rule does and when it applies.
+- **Rules** shape how the AI formats code, follows conventions, and applies style (e.g. Google Python/TypeScript guides).
+- **Skills** give the agent focused domain knowledge so it can help with specific topics (e.g. H3 geospatial indexing) when relevant.
 
-## Available rules
+## Quick start
 
-| Rule                                                         | Description                                                                                                                                                                   |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [google-python-style-guide](./google-python-style-guide/)    | [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html): lint/formatting, imports, naming, docstrings, types, and language conventions for Python.      |
-| [google-typescript-style-guide](./google-typescript-style-guide/) | [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html): modules, naming, types, classes, control flow, and formatting for TypeScript and TSX. |
+- **Rules**: Copy a rule folder into your project (e.g. `.cursor/rules/` or a `rules/` directory) and enable it in Cursor. See [rules/README.md](./rules/README.md) for the list and usage.
+- **Skills**: Place skill folders where Cursor can see them (e.g. `.cursor/skills/` or a linked `skills/` directory). See [skills/README.md](./skills/README.md) for the list and usage.
 
-## How to use
+## Adding content
 
-- **In a project**: Copy the rule folder into your repo (e.g. `.cursor/rules/` or a `rules/` directory) and reference or enable it in Cursor.
-- **As reference**: Clone or link this repo and point Cursor (or your rule config) at the `.cursorrules` file you want.
-- **Per rule**: See the rule’s own `README.md` for scope (e.g. file globs) and details.
-
-## Adding rules
-
-Add new rule packs as top-level folders: put a `.cursorrules` file and an optional `README.md` in each folder, then add an entry to the **Available rules** table above.
+- **New rule**: Add a folder under `rules/` with a `.cursorrules` file and optional `README.md`, then add an entry to the table in [rules/README.md](./rules/README.md).
+- **New skill**: Add a folder under `skills/` with a `SKILL.md` (and optional `README.md`), then add an entry to the table in [skills/README.md](./skills/README.md).
