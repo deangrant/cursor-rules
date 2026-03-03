@@ -1,7 +1,7 @@
 ---
 description: Enforce Rust code style (line length, file size, rustfmt, style preferences)
 globs: "**/*.rs"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Rust Code Style Enforcement Rule
@@ -11,7 +11,7 @@ You are an expert Rust developer following a strict, clean, and maintainable sty
 ## Core Formatting Rules
 
 - **Maximum line length: 100 characters**  
-  Never exceed 100 characters per line (including indentation, comments, strings). Prefer 80–90 when it improves readability.
+  Never exceed 100 characters per line (including indentation, comments, strings). Prefer 80â€“90 when it improves readability.
 
 - **Maximum file length: 500 lines**  
   Keep `.rs` files under 500 lines (excluding blank lines and license header). If a file approaches ~450 lines:
@@ -26,7 +26,7 @@ Follow rustfmt defaults with these overrides:
 - Spaces only, never tabs; **indentation = 4 spaces**
 - `max_width = 100`, `comment_width = 100` (prefer wrapping prose at ~80)
 - Trailing commas in multi-line lists/arrays/tuples/matches
-- `chain_width = 80` — avoid long method chains on one line
+- `chain_width = 80` â€” avoid long method chains on one line
 - Block indentation style (not visual/aligned) for function args, structs, etc.
 - `imports_granularity = "Module"` (or `"Crate"` consistently)
 - `group_imports = "StdExternalCrate"`
@@ -52,7 +52,9 @@ Follow rustfmt defaults with these overrides:
 - **Module docs**: Public modules must have `//!` documentation; first sentence follows the same rule.
 - **Canonical sections** when applicable: `# Examples`, `# Errors`, `# Panics`, `# Safety`, `# Abort`. Do not use parameter tables; describe parameters in prose (e.g. "Copies from `src` to `dst`").
 - For `pub use` re-exports of crate items, use `#[doc(inline)]` at the use site so docs inline; do not use for `std` or third-party types.
-- Reference: [Rust API Guidelines — Documentation](https://rust-lang.github.io/api-guidelines/documentation.html), [Microsoft Docs guidelines](https://microsoft.github.io/rust-guidelines/guidelines/docs/).
+- **Private items**: Document non-trivial private functions and use `/// # Safety` for every `unsafe` item; see **rust-style-documentation** rule in this folder for when and how.
+- For full documentation rules (first sentence, module docs, canonical sections, re-exports, private items), see the dedicated **rust-documentation** rule in this folder.
+- Reference: [Rust API Guidelines â€” Documentation](https://rust-lang.github.io/api-guidelines/documentation.html), [Microsoft Docs guidelines](https://microsoft.github.io/rust-guidelines/guidelines/docs/).
 
 ## Attributes
 
@@ -64,10 +66,10 @@ Follow rustfmt defaults with these overrides:
 
 ## Style Preferences
 
-- Prefer small functions (ideally < 40–50 lines).
+- Prefer small functions (ideally < 40â€“50 lines).
 - Prefer early returns over deep nesting; use `let-else` and `if let` to reduce nesting.
-- Avoid rightward drift — break long expressions early.
-- **Functions and methods**: Use inherent methods for constructors (static, no `self`) and when there is a clear receiver; otherwise prefer regular (free) functions unless an associated function improves clarity. See [API Guidelines — Predictability](https://rust-lang.github.io/api-guidelines/predictability.html) and [Microsoft M-REGULAR-FN](https://microsoft.github.io/rust-guidelines/guidelines/universal/#M-REGULAR-FN).
+- Avoid rightward drift â€” break long expressions early.
+- **Functions and methods**: Use inherent methods for constructors (static, no `self`) and when there is a clear receiver; otherwise prefer regular (free) functions unless an associated function improves clarity. See [API Guidelines â€” Predictability](https://rust-lang.github.io/api-guidelines/predictability.html) and [Microsoft M-REGULAR-FN](https://microsoft.github.io/rust-guidelines/guidelines/universal/#M-REGULAR-FN).
 - **Naming**: Consistent word order; getters per Rust convention; ad-hoc conversions use `as_`, `to_`, `into_`; iterators use `iter`, `iter_mut`, `into_iter`; names concise, free of weasel words. Casing per RFC 430.
 - **Public types**: Implement `Debug` for all public types; implement `Display` for types meant to be read by users.
 - **Lint overrides**: Prefer `#[expect(...)]` over `#[allow(...)]` when overriding lints.
@@ -76,7 +78,8 @@ Follow rustfmt defaults with these overrides:
 
 ## References
 
-For the full list of style guides and checklists to align with, see **references.md** in this folder:
+- **Documentation (dedicated rule)**: See **rust-documentation.mdc** in this folder for API doc and module-doc rules aligned with [Microsoft Documentation](https://microsoft.github.io/rust-guidelines/guidelines/docs/).
+- **Full style references**: See **references.md** in this folder:
 
 `.cursor/rules/rust-style-guide/references.md`
 
