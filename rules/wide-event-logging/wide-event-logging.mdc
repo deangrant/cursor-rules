@@ -1,0 +1,154 @@
+---
+description: Wide event / canonical log line logging for request-scoped, queryable observability (see loggingsucks.com)
+globs: "**/*"
+alwaysApply: false
+---
+
+# Wide Event Logging
+
+Implement **wide events** (canonical log lines): one structured event per request per service, emitted once at the end of the request. Reference: [Logging Sucks – Your Logs Are Lying To You](https://loggingsucks.com/).
+
+## Why this matters
+
+- **Logs were built for a different era.** A single user request can touch many services, databases, caches, and queues. If you emit many log lines per request (e.g. 17 lines for one successful request), at scale you get noise and no single place to answer “what happened to this request?”
+- **String search is broken.** Searching for “user-123” can match logs written 47 different ways (`user_id=user-123`, `{"userId":"user-123"}`, `[USER:user-123]`, etc.). Downstream services may only log order IDs, so you end up doing multiple searches and guessing. **Logs are optimized for writing, not querying.**
+- **The fix:** Log *what happened to this request* in **one wide event** per request per service hop, with **high cardinality** (e.g. user_id, request_id) and **high dimensionality** (many fields) so you can query by `user_id`, `status_code`, `error.code`, etc., instead of grepping.
+
+## Terms
+
+| Term | Meaning |
+|------|--------|
+| **Structured logging** | Key-value / JSON logs instead of plain strings. Necessary but not sufficient. |
+| **Cardinality** | Unique values per field. `user_id` is high (millions); `http_method` is low (GET/POST/…). High cardinality makes logs useful for debugging. |
+| **Dimensionality** | Number of fields per event. More dimensions = more questions you can answer. |
+| **Wide event** | One context-rich event per request per service (e.g. 50+ fields) instead of many sparse lines. |
+| **Canonical log line** | Same idea as wide event (Stripe’s term): one authoritative line per request. |
+
+## What OpenTelemetry does *not* do
+
+OpenTelemetry is a protocol and SDKs for collecting and exporting telemetry. It does **not**:
+
+1. Decide what to log — you still instrument deliberately.
+2. Add business context — subscription tier, cart value, feature flags; you must add them.
+3. Fix the mental model — if you still emit “log statements” as tiny spans, you get bad telemetry in a standard format.
+
+Treat OTel as transport; **you** supply the wide-event shape and business context. Ideally your wide event *is* (or backs) the span for that service hop, enriched with full context.
+
+## Event shape (framework-agnostic)
+
+Attach context to a **single mutable event** and emit it once when the request completes. Include:
+
+| Category | Examples |
+|----------|----------|
+| **Request** | `request_id`, `trace_id`, `method`, `path`, `status_code`, `duration_ms`, `outcome` |
+| **Service** | `service`, `version`, `deployment_id`, `region` |
+| **User / identity** | `user.id`, `user.subscription`, `user.account_age_days`, `user.lifetime_value_cents` (or equivalent) |
+| **Business** | Domain-specific: cart, order, payment attempt, feature flags, etc. |
+| **Error** | `error.type`, `error.code`, `error.message`, `error.retriable`, provider codes (e.g. `stripe_decline_code`) |
+
+Use **consistent field names** (e.g. always `user_id` or always `user.id`) so downstream systems can query reliably.
+
+## Implementation pattern
+
+1. **Request start:** Create one event object with request + service metadata; attach it to request context (middleware, filter, thread-local, DI-scoped bag, etc.).
+2. **During handling:** Enrich the same object with user, business, and error details as you go.
+3. **Request end:** In one place (middleware/finally), set `duration_ms`, `outcome`, final status, then log the whole object once (e.g. as JSON).
+
+Avoid scattering many log calls per request; avoid logging only free-form strings.
+
+## Tail sampling (at scale)
+
+Decide **after** the request completes:
+
+- **Always keep:** errors (e.g. status ≥ 500, exceptions), slow requests (e.g. above p99), VIP/flagged users or sessions, or specific feature flags during rollouts.
+- **Sample the rest:** e.g. 1–5% of successful, fast requests.
+
+This keeps costs down without dropping the events that matter for debugging.
+
+## Full contextual example (request lifecycle → one wide event)
+
+Below: one request through a checkout-style flow, built incrementally and emitted once at the end.
+
+**1) Request enters service**
+
+- Create event with: `timestamp`, `request_id`, `trace_id`, `method`, `path`, `service`, `version`, `deployment_id`, `region`.
+- Put the event in request-scoped context so handlers can mutate it.
+
+**2) Auth / user resolution**
+
+- Set `user.id`, `user.subscription`, `user.account_age_days`, `user.lifetime_value_cents` (or equivalent).
+
+**3) Business logic (e.g. cart, payment)**
+
+- Set `cart.id`, `cart.item_count`, `cart.total_cents`, `cart.coupon_applied`.
+- Set `payment.method`, `payment.provider`, `payment.latency_ms`, `payment.attempt`.
+- If failure: set `error.type`, `error.code`, `error.message`, `error.retriable`, provider-specific codes (e.g. `stripe_decline_code`).
+
+**4) Request end (success or failure)**
+
+- Set `status_code`, `duration_ms`, `outcome` (`success` | `error`).
+- Log the full event once (single JSON line).
+
+**Example wide event (canonical log line):**
+
+```json
+{
+  "timestamp": "2025-01-15T10:23:45.612Z",
+  "request_id": "req_8bf7ec2d",
+  "trace_id": "abc123",
+  "service": "checkout-service",
+  "version": "2.4.1",
+  "deployment_id": "deploy_789",
+  "region": "us-east-1",
+  "method": "POST",
+  "path": "/api/checkout",
+  "status_code": 500,
+  "duration_ms": 1247,
+  "outcome": "error",
+  "user": {
+    "id": "user_456",
+    "subscription": "premium",
+    "account_age_days": 847,
+    "lifetime_value_cents": 284700
+  },
+  "cart": {
+    "id": "cart_xyz",
+    "item_count": 3,
+    "total_cents": 15999,
+    "coupon_applied": "SAVE20"
+  },
+  "payment": {
+    "method": "card",
+    "provider": "stripe",
+    "latency_ms": 1089,
+    "attempt": 3
+  },
+  "error": {
+    "type": "PaymentError",
+    "code": "card_declined",
+    "message": "Card declined by issuer",
+    "retriable": false,
+    "stripe_decline_code": "insufficient_funds"
+  },
+  "feature_flags": {
+    "new_checkout_flow": true,
+    "express_payment": false
+  }
+}
+```
+
+With this, one query (e.g. `user.id = "user_456"` or `error.code = "card_declined"`) gives the full picture: premium user, 3rd attempt, insufficient funds, new checkout flow — no second search.
+
+## Misconceptions (from the reference)
+
+- **“Structured logging = wide events”** — No. Structured = JSON/table stakes. Wide events = one comprehensive event per request with high cardinality and dimensionality.
+- **“We use OTel, so we’re good”** — OTel is transport; you still add business context and a wide-event shape.
+- **“This is just tracing”** — Tracing shows flow across services; wide events give context *within* a service. Complementary; ideally the wide event backs or equals the span enriched with context.
+- **“High cardinality is too expensive”** — Legacy log search systems struggle; columnar stores (ClickHouse, BigQuery, etc.) are built for high-cardinality, high-dimensionality data.
+
+## What to avoid
+
+- Many log lines per request (prefer one wide event per request per service).
+- Plain string-only messages; use structured fields with stable keys.
+- Low context (no user/business identifiers) so debugging stays grep archaeology.
+- Assuming OpenTelemetry replaces the need to design what to capture.
