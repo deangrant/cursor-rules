@@ -18,6 +18,7 @@ Each subfolder is a self-contained rule pack with:
 | [google-typescript-style-guide](./google-typescript-style-guide/) | [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html): modules, naming, types, classes, control flow, and formatting for TypeScript and TSX. |
 | [rust-style-guide](./rust-style-guide/)                      | Rust code style: 100-char lines, 500-line files, rustfmt alignment, comments, docs, naming, and alignment with official Rust and API guidelines.                             |
 | [wide-event-logging](./wide-event-logging/)                  | Wide event / canonical log line logging: one structured event per request per service, high cardinality/dimensionality, tail sampling. Framework-agnostic; reference [loggingsucks.com](https://loggingsucks.com/). |
+| [typescript-docstrings](./typescript-docstrings/)            | TypeScript/JSDoc inline documentation: complete JSDoc and inline comments for public APIs, classes, and complex logic; “why not what”; TypeDoc-friendly. |
 
 ## How to use
 

@@ -11,7 +11,7 @@ Reusable [Cursor](https://cursor.com) commands, rules, and agent skills for cons
 | [**skills/**](./skills/)     | Agent skills (domain knowledge, when-to-use guidance) — each with a `SKILL.md` and optional README/reference. |
 
 - **Commands** are reusable prompts and workflows (e.g. read-only code review) you invoke from chat or as Cursor custom commands.
-- **Rules** shape how the AI formats code, follows conventions, and applies style (e.g. Google Python/TypeScript, Rust style guide).
+- **Rules** shape how the AI formats code, follows conventions, and applies style (e.g. Google Python/TypeScript, Rust style guide, TypeScript/JSDoc inline documentation).
 - **Skills** give the agent focused domain knowledge so it can help with specific topics (e.g. H3 geospatial indexing) when relevant.
 
 ## Quick start
